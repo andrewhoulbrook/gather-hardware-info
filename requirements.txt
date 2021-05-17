@@ -1,0 +1,9 @@
+lshw
+lsscsi
+ioping
+hwinfo
+memtester
+e2fsprogs
+figlet
+toilet
+sqlite3
