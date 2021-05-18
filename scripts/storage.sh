@@ -8,10 +8,10 @@ then
     exit 1
 fi
 
-echo ""
-echo -e "${GREEN}------------------------------------------"
-echo "          SYSTEM HARD DISKS               "
-echo "------------------------------------------"
+echo -e "${GREEN}"
+echo "------------------------------------------------------------------------------------"
+echo "                              SYSTEM HARD DISKS                                     "
+echo "------------------------------------------------------------------------------------"
 
 # List characteristics of installed hard disks
 echo ""
@@ -46,9 +46,43 @@ echo -e "${GREEN}"
 read -p "Press enter key to continue"
 
 disks=$(lsblk -dn -o NAME | egrep -v 'loop|mapper|md|sr')
+        
+# Scan for bad sectors on each disk installed in the machine
+for disk in "${disks}"
+do
+    echo -e "${NO_COLOUR}"
+        
+    # Check is SMART support is available/enabled
+    if [[ -z $(smartctl -i "/dev/${disk}" | grep -i "SMART support is: disabled") ]]
+    then
+        # Try to enable SMART
+        smartctl -s on "/dev/${disk}"
+        if [[ $? -eq 0 ]]
+        then
+            # Run SMART health check and self-test
+            smartctl -a "/dev/${disk}"
+            echo ""
+            # Output any errors
+            smartctl -l error -l selftest "/dev/${disk}"
+            echo ""
+        fi
+    fi 
+
+    echo -e "${GREEN}"
+
+    # Offer to run additional scan with badblocks utility
+    echo -n "Do you want to scan for bad sectors on installed disks (may take some time depending of the disk size)? [Y|n]"
+    read bb_scan
+    if [[ "${bb_scan}" == "Y" || "${bb_scan}" == "y" ]]
+    then
+        echo -e "${NO_COLOUR} "
+        block_size=$(stat -f ~/.bashrc | grep -i "block size" | cut -d " " -f 3)
+        badblocks -v -b "${block_size}" "/dev/${disk}"
+    fi
+    echo ""
+done
 
 # I/O performance snapshot for each installed disk
-echo ""
 echo -e "${RED}Performing quick I/O test of installed disks:${NO_COLOUR}"
 echo ""
 for disk in "${disks}"
@@ -56,38 +90,3 @@ do
     ioping -c 10 "/dev/${disk}"
     echo ""
 done
-
-echo -e "${GREEN}"
-echo -n "Do you want to scan for bad sectors on installed disks (may take some time depending of the disk size)? [Y|n]"
-read sector_scan
-echo ""
-if [[ "${sector_scan}" == "Y" || "${sector_scan}" == "y" ]]
-then
-    block_size=$(stat -f ~/.bashrc | grep -i "block size" | cut -d " " -f 3)
-    
-    # Scan for bad sectors on each disk installed in the machine
-    for disk in "${disks}"
-    do
-        echo -e "${NO_COLOUR}"
-        scan=$(badblocks -v -b "${block_size}" "/dev/${disk}")
-        echo "${scan}"
-        echo ""
-        if [[ -n $(echo ${scan} | grep "0 bad blocks found") ]]
-        then 
-            # Offer to run fsck utility to attempt any quick fixes if bad sectors found
-            echo -e "${GREEN}" 
-            echo -n "Bad blocks found. Do you want to attempt repair with fsck? [Y|n]"
-            read repair
-            if [[ "${repair}" == "Y" || "${repair}" == "y" ]]
-            then
-                echo -e "${NO_COLOUR}"
-                echo ""
-                fsck -vcck "/dev/${disk}"
-            fi
-        fi
-        echo ""
-    done
-else
-   exit 0
-fi
-

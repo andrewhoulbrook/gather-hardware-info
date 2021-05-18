@@ -112,14 +112,14 @@ product_model="$(cat "${log}" | grep -i "product name:" | head -n 1 | cut -d ":"
 manuf_date="$(cat "${log}" | grep -i "release date:" | head -n 1 | cut -d ":" -f 2 | cut -d "/" -f 3 | awk '{$1=$1};1')"
 
 # Check if device is already recorded in ORDS repair database
-if [[ $(sqlite3 "${db}" "SELECT EXISTS(SELECT id FROM devices WHERE id=\"${product_id}\");") -eq 0 ]]
+if [[ "$(sqlite3 "${db}" "SELECT EXISTS(SELECT id FROM devices WHERE id=\"${product_id}\")";)" -eq 0 ]]
 then
     # Insert ORDS repair data into sqlite database
     sqlite3 "${db}" "INSERT INTO devices VALUES (\"${product_id}\", \"${product_cat}\", \"${product_manuf}\", \"${product_model}\", ${manuf_date});" 
 fi
 
 echo ""
-echo "Device information has been stored in log/${product_id}-$(date +%s).log file"
+echo "Device information has been stored in log/${product_id}-$(date +%s).log"
 
 # Renamee log file with device name and timestamp
 mv "${log}" "log/${product_id}-$(date +%s).log"
@@ -128,6 +128,7 @@ echo ""
 echo "Open Repair Data for this device has been stored in database ${db}"
 echo ""
 echo -e "${RED}Ready to shutdown${GREEN}"
+echo ""
 read -p "Press enter key to initiate system shutdown"
 echo ""
 figlet -c -k "Goodbye!"

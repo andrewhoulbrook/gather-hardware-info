@@ -8,10 +8,10 @@ then
     exit 1
 fi
 
-echo ""
-echo -e "${GREEN}------------------------------------------"
-echo "          NETWORKING DEVICES              "
-echo "------------------------------------------"
+echo -e "${GREEN}"
+echo "------------------------------------------------------------------------------------"
+echo "                              NETWORKING DEVICES                                    "
+echo "------------------------------------------------------------------------------------"
 
 # List characteristics of installed networking devices
 echo ""

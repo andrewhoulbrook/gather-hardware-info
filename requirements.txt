@@ -3,6 +3,7 @@ lsscsi
 ioping
 hwinfo
 memtester
+smartmontools
 e2fsprogs
 figlet
 toilet

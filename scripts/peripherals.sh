@@ -8,10 +8,10 @@ then
     exit 1
 fi
 
-echo ""
-echo -e "${GREEN}------------------------------------------"
-echo "          PERIPHERAL DEVICES              "
-echo "------------------------------------------"
+echo -e "${GREEN}"
+echo "------------------------------------------------------------------------------------"
+echo "                                PERIPHERAL DEVICES                                  "
+echo "------------------------------------------------------------------------------------"
 
 # List characteristics of installed SCSI devices
 echo ""

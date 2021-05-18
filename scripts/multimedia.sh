@@ -8,10 +8,10 @@ then
     exit 1
 fi
 
-echo ""
-echo -e "${GREEN}------------------------------------------"
-echo "        SYSTEM VIDEO/AUDIO DEVICES        "
-echo "------------------------------------------"
+echo -e "${GREEN}"
+echo "------------------------------------------------------------------------------------"
+echo "                           SYSTEM VIDEO/AUDIO DEVICES                               "
+echo "------------------------------------------------------------------------------------"
 
 # List characteristics of installed display/video modules
 echo ""
