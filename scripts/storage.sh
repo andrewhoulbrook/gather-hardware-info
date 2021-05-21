@@ -1,4 +1,4 @@
-#!/bin/bash
+
 # Script to gather basic information about hard disks installed in a machine
 
 # Check if user is root
@@ -46,23 +46,35 @@ echo -e "${GREEN}"
 read -p "Press enter key to continue"
 
 disks=$(lsblk -dn -o NAME | egrep -v 'loop|mapper|md|sr')
-        
+smart_enable_error="false"
+
 # Scan for bad sectors on each disk installed in the machine
 for disk in "${disks}"
 do
     echo -e "${NO_COLOUR}"
         
     # Check is SMART support is available/enabled
-    if [[ -z $(smartctl -i "/dev/${disk}" | grep -i "SMART support is: disabled") ]]
+    if [[ -n $(smartctl -i "/dev/${disk}" | grep -i "SMART support is: available") ]]
     then
-        # Try to enable SMART
-        smartctl -s on "/dev/${disk}"
-        if [[ $? -eq 0 ]]
+        if [[ -n $(smartctl -i "/dev/${disk}" | grep -i "SMART support is: disabled") ]]
+        then
+            # Try to enable SMART
+            smartctl -s on "/dev/${disk}"
+        
+            if [[ $? -eq 0 ]]
+            then
+                echo "${RED}ERROR: SMART can not be enabled on /dev/${disk}${NO_COLOUR}"
+                smart_enable_error="true"
+            fi
+        fi
+        
+        if [[ "${smart_enable_error}" == "false" ]]
         then
             # Run SMART health check and self-test
             smartctl -a "/dev/${disk}"
+        
+            # Output any errors`found
             echo ""
-            # Output any errors
             smartctl -l error -l selftest "/dev/${disk}"
             echo ""
         fi
