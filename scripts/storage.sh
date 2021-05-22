@@ -39,13 +39,13 @@ echo -e "${RED}List of block devices and file systems:${NO_COLOUR}"
 echo ""
 lsblk -f
 echo ""
-fdisk -l | egrep -v '/dev/(loop|mapper|md|sr)'
+fdisk -l | grep -Eiv '/dev/(loop|mapper|md|sr)'
 echo ""
 
 echo -e "${GREEN}"
 read -p "Press enter key to continue"
 
-disks=$(lsblk -dn -o NAME | egrep -v 'loop|mapper|md|sr')
+disks=$(lsblk -dn -o NAME | grep -Eiv 'loop|mapper|md|sr')
 smart_enable_error="false"
 
 # Scan for bad sectors on each disk installed in the machine
